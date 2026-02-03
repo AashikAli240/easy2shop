@@ -1,10 +1,11 @@
-# k8s/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: easy2shop-deployment
+  labels:
+    app: easy2shop
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: easy2shop
@@ -18,4 +19,19 @@ spec:
           image: easy2shop:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 8000
+            - containerPort: 5000
+
+          # Health checks (recommended)
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10

@@ -36,13 +36,12 @@ pipeline {
 
         stage('Deploy (Kubernetes)') {
             steps {
-                script {
-                    bat 'kubectl apply --validate=false -f k8s/deployment.yaml'
-                    bat 'kubectl apply --validate=false -f k8s/service.yaml'
-
+                withCredentials([file(credentialsId: 'kubeconfig-easy2shop', variable: 'KCFG')]) {
+                    bat """
+                        kubectl --kubeconfig=%KCFG% apply --validate=false -f k8s\\deployment.yaml
+                    """
                 }
             }
         }
-
     }
 }
