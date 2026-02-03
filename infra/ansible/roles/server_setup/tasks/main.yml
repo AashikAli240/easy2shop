@@ -1,0 +1,32 @@
+---
+- name: Update package cache
+  ansible.builtin.package:
+    update_cache: yes
+
+- name: Install basic packages
+  ansible.builtin.package:
+    name:
+      - git
+      - python3
+      - python3-pip
+    state: present
+
+- name: Install Docker
+  ansible.builtin.package:
+    name: docker.io
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install kubectl (example via curl)
+  ansible.builtin.command: >
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  args:
+    chdir: /usr/local/bin
+  when: ansible_os_family == "Debian"
+
+- name: Make kubectl executable
+  ansible.builtin.file:
+    path: /usr/local/bin/kubectl
+    mode: '0755'
+  when: ansible_os_family == "Debian"
+
