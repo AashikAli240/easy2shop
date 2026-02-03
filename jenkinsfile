@@ -28,14 +28,21 @@ pipeline {
         stage('Deploy (Docker)') {
             steps {
                 script {
-                    // Stop + remove old container
                     bat 'docker rm -f easy2shop || echo "No old container"'
-
-                    // Run new container
                     bat 'docker run -d -p 8000:8000 --name easy2shop easy2shop:latest'
+                }
+            }
+        }
+
+        stage('Deploy (Kubernetes)') {
+            steps {
+                script {
+                    bat 'kubectl apply -f k8s/deployment.yaml'
+                    bat 'kubectl apply -f k8s/service.yaml'
                 }
             }
         }
 
     }
 }
+
