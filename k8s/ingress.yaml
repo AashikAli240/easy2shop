@@ -1,9 +1,11 @@
-                 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: easy2shop-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
     - host: easy2shop.local
       http:
@@ -14,4 +16,4 @@ spec:
               service:
                 name: easy2shop-service
                 port:
-                  number: 8000
+                  number: 5000

@@ -9,36 +9,23 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Use Minikube Docker Daemon') {
             steps {
-                script {
-                    bat 'docker build -t easy2shop:latest .'
-                }
+                bat 'wsl -d Ubuntu bash -c "eval $(minikube docker-env)"'
             }
         }
 
-        stage('Run Tests') {
+        stage('Build Docker Image (Inside Minikube)') {
             steps {
-                script {
-                    bat 'echo "Skipping tests on Windows agent (pytest not installed)"'
-                }
+                bat 'wsl -d Ubuntu bash -c "cd /mnt/c/Users/%USERNAME%/projects/easy2shop && docker build -t easy2shop:latest ."'
             }
         }
 
-        stage('Deploy (Docker)') {
-            steps {
-                script {
-                    bat 'docker rm -f easy2shop || echo "No old container"'
-                    bat 'docker run -d -p 5000:5000 --name easy2shop easy2shop:latest'
-                }
-            }
-        }
-
-        stage('Deploy (Kubernetes)') {
+        stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-easy2shop', variable: 'KCFG')]) {
                     bat """
-                        kubectl --kubeconfig=%KCFG% apply --validate=false -f k8s\\deployment.yaml
+                        wsl -d Ubuntu bash -c "kubectl --kubeconfig=/mnt/c/Users/%USERNAME%/kubeconfig-easy2shop apply -f /mnt/c/Users/%USERNAME%/projects/easy2shop/k8s/"
                     """
                 }
             }
