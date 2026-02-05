@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        WSL = 'wsl -d Ubuntu bash -c'
+        WORKDIR = '/mnt/c/ProgramData/Jenkins/.jenkins/workspace/Easy2Shop-CICD'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -9,28 +14,43 @@ pipeline {
             }
         }
 
-        stage('Use Minikube Docker') {
+        stage('Configure Minikube Docker') {
             steps {
-                bat 'wsl -d Ubuntu bash -c "eval $(minikube docker-env)"'
+                bat "${WSL} \"eval \$(minikube docker-env)\""
             }
         }
 
         stage('Build Docker Image (Inside Minikube)') {
             steps {
-                bat 'wsl -d Ubuntu bash -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Easy2Shop-CICD && docker build -t easy2shop:latest ."'
+                bat "${WSL} \"cd ${WORKDIR} && docker build -t easy2shop:latest .\""
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Apply Kubernetes Deployment') {
             steps {
-                bat 'wsl -d Ubuntu bash -c "kubectl apply -f /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Easy2Shop-CICD/k8s/deployment.yaml"'
+                bat "${WSL} \"kubectl apply -f ${WORKDIR}/k8s/deployment.yaml\""
             }
         }
 
         stage('Restart Deployment') {
             steps {
-                bat 'wsl -d Ubuntu bash -c "kubectl rollout restart deployment easy2shop-deployment"'
+                bat "${WSL} \"kubectl rollout restart deployment easy2shop-deployment\""
             }
+        }
+
+        stage('Verify Rollout') {
+            steps {
+                bat "${WSL} \"kubectl rollout status deployment/easy2shop-deployment\""
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🚀 Deployment Successful — Easy2Shop updated on Kubernetes"
+        }
+        failure {
+            echo "❌ Deployment Failed — Check logs"
         }
     }
 }
