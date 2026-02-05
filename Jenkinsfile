@@ -9,7 +9,7 @@ pipeline {
             }
         }
 
-        stage('Use Minikube Docker Daemon') {
+        stage('Use Minikube Docker') {
             steps {
                 bat 'wsl -d Ubuntu bash -c "eval $(minikube docker-env)"'
             }
@@ -17,13 +17,13 @@ pipeline {
 
         stage('Build Docker Image (Inside Minikube)') {
             steps {
-                bat 'wsl -d Ubuntu bash -c "cd /mnt/c/Users/%USERNAME%/projects/easy2shop && docker build -t easy2shop:latest ."'
+                bat 'wsl -d Ubuntu bash -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Easy2Shop-CICD && docker build -t easy2shop:latest ."'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'wsl -d Ubuntu bash -c "kubectl apply -f /mnt/c/Users/%USERNAME%/projects/easy2shop/k8s/"'
+                bat 'wsl -d Ubuntu bash -c "kubectl apply -f /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Easy2Shop-CICD/k8s/deployment.yaml"'
             }
         }
 
