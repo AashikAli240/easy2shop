@@ -4,19 +4,17 @@ pipeline {
     environment {
         WSL = 'wsl -d Ubuntu bash -c'
         WORKDIR = '/mnt/c/ProgramData/Jenkins/.jenkins/workspace/Easy2Shop-CICD'
-        IMAGE_NAME = 'easy2shop'
-        TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/AashikAli240/easy2shop.git'
             }
         }
 
-        stage('Configure Minikube Docker') {
+        stage('Use Minikube Docker') {
             steps {
                 bat "${WSL} \"eval \$(minikube docker-env)\""
             }
@@ -24,19 +22,7 @@ pipeline {
 
         stage('Build Docker Image (Inside Minikube)') {
             steps {
-                bat "${WSL} \"cd ${WORKDIR} && docker build -t ${IMAGE_NAME}:${TAG} -t ${IMAGE_NAME}:latest .\""
-            }
-        }
-
-        stage('Update Deployment YAML Image Tag') {
-            steps {
-                bat "${WSL} \"sed -i 's|image: easy2shop:.*|image: easy2shop:${TAG}|g' ${WORKDIR}/k8s/deployment.yaml\""
-            }
-        }
-
-        stage('Apply Kubernetes Deployment') {
-            steps {
-                bat "${WSL} \"kubectl apply -f ${WORKDIR}/k8s/deployment.yaml\""
+                bat "${WSL} \"cd ${WORKDIR} && docker build -t easy2shop:latest .\""
             }
         }
 
@@ -51,17 +37,11 @@ pipeline {
                 bat "${WSL} \"kubectl rollout status deployment/easy2shop-deployment\""
             }
         }
-
-        stage('Cleanup Old Images') {
-            steps {
-                bat "${WSL} \"docker image prune -f\""
-            }
-        }
     }
 
     post {
         success {
-            echo "🚀 Deployment Successful — Easy2Shop updated with version ${TAG}"
+            echo "🚀 Deployment Successful — Easy2Shop updated"
         }
         failure {
             echo "❌ Deployment Failed — Check logs"
