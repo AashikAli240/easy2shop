@@ -17,7 +17,7 @@ pipeline {
         stage('Build Docker Image (Inside Minikube)') {
             steps {
                 bat """
-                ${WSL} "eval \\\$(minikube docker-env) && cd ${WORKDIR} && docker build -t easy2shop:latest ."
+                wsl -d Ubuntu bash -c "eval \\\$(minikube docker-env) && cd ${WORKDIR} && docker build -t easy2shop:latest ."
                 """
             }
         }
@@ -25,7 +25,7 @@ pipeline {
         stage('Update Deployment Image') {
             steps {
                 bat """
-                ${WSL} "eval \\\$(minikube docker-env) && kubectl set image deployment/easy2shop-deployment easy2shop=easy2shop:latest --record"
+                wsl -d Ubuntu bash -c "eval \\\$(minikube docker-env) && kubectl set image deployment/easy2shop-deployment easy2shop=easy2shop:latest --record"
                 """
             }
         }
@@ -33,7 +33,7 @@ pipeline {
         stage('Verify Rollout') {
             steps {
                 bat """
-                ${WSL} "kubectl rollout status deployment/easy2shop-deployment"
+                wsl -d Ubuntu bash -c "kubectl rollout status deployment/easy2shop-deployment"
                 """
             }
         }
