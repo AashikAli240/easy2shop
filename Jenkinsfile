@@ -14,27 +14,27 @@ pipeline {
             }
         }
 
-        stage('Use Minikube Docker') {
-            steps {
-                bat "${WSL} \"eval \$(minikube docker-env)\""
-            }
-        }
-
         stage('Build Docker Image (Inside Minikube)') {
             steps {
-                bat "${WSL} \"cd ${WORKDIR} && docker build -t easy2shop:latest .\""
+                bat """
+                ${WSL} "eval \$(minikube docker-env) && cd ${WORKDIR} && docker build -t easy2shop:latest ."
+                """
             }
         }
 
         stage('Update Deployment Image') {
             steps {
-                bat "${WSL} \"kubectl set image deployment/easy2shop-deployment easy2shop=easy2shop:latest --record\""
+                bat """
+                ${WSL} "eval \$(minikube docker-env) && kubectl set image deployment/easy2shop-deployment easy2shop=easy2shop:latest --record"
+                """
             }
         }
 
         stage('Verify Rollout') {
             steps {
-                bat "${WSL} \"kubectl rollout status deployment/easy2shop-deployment\""
+                bat """
+                ${WSL} "kubectl rollout status deployment/easy2shop-deployment"
+                """
             }
         }
     }
