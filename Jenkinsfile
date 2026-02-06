@@ -26,9 +26,9 @@ pipeline {
             }
         }
 
-        stage('Restart Deployment') {
+        stage('Update Deployment Image') {
             steps {
-                bat "${WSL} \"kubectl rollout restart deployment easy2shop-deployment\""
+                bat "${WSL} \"kubectl set image deployment/easy2shop-deployment easy2shop=easy2shop:latest --record\""
             }
         }
 
