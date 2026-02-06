@@ -1,8 +1,0 @@
----
-- name: Server setup for Easy2Shop
-  hosts: servers
-  become: true
-
-  roles:
-    - server_setup
-
